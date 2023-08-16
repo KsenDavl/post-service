@@ -20,7 +20,7 @@ public class PostController {
 
     private final PostService postService;
 
-    @PostMapping("/post")
+    @PostMapping("/post/new")
     public ResponseEntity<Void> registerNewPostItem(@RequestBody NewPostItemDto newPostItemDto) {
         postService.registerNewPostItem(newPostItemDto);
         return ResponseEntity.ok().build();
@@ -41,5 +41,11 @@ public class PostController {
     @GetMapping("/post/tracking/{postItemId}")
     public ResponseEntity<PostItemTrackingInfo> getPostItemTrackingInfo(@PathVariable long postItemId) {
         return ResponseEntity.ok().body(postService.getPostItemTrackingInfo(postItemId));
+    }
+
+    @PostMapping("post/receiving/{postItemId}")
+    public ResponseEntity<Void> receivePostItemByAddressee(@PathVariable long postItemId) {
+        postService.receivePostItemByAddressee(postItemId);
+        return ResponseEntity.ok().build();
     }
 }

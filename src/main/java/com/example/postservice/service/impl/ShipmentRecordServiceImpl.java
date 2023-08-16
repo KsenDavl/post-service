@@ -41,8 +41,8 @@ public class ShipmentRecordServiceImpl implements ShipmentRecordService {
     }
 
     @Override
-    public void createItemReceivedRecord(PostItem postItem, PostOffice postOffice) {
-        String text = "Received by the addressee from " + postOffice.getName();
+    public void createItemReceivedRecord(PostItem postItem) {
+        String text = "Received by the addressee" ;
         createShipmentRecord(postItem, text);
     }
 

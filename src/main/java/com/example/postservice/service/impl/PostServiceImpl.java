@@ -45,15 +45,20 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    @Transactional
     public void receivePostItem(PostItemRequestDto requestDto) {
         PostOffice postOffice = postOfficeRepository.findById(requestDto.getPostOfficeIndex())
                 .orElseThrow();
         PostItem postItem = postItemRepository.findById(requestDto.getPostItemId())
                 .orElseThrow();
-        postItem.setStatus(PostItemStatus.ACCEPTED);
+        if (requestDto.getPostOfficeIndex() == postItem.getReceiverIndex()) {
+            postItem.setStatus(PostItemStatus.DELIVERED);
+            shipmentRecordService.createItemDeliveredRecord(postItem, postOffice);
+        } else {
+            postItem.setStatus(PostItemStatus.ACCEPTED);
+            shipmentRecordService.createAcceptanceRecord(postItem, postOffice);
+        }
         postItemRepository.save(postItem);
-
-        shipmentRecordService.createAcceptanceRecord(postItem, postOffice);
     }
 
     @Override
@@ -75,5 +80,15 @@ public class PostServiceImpl implements PostService {
         List<ShipmentRecordDto> records = shipmentRecordMapper
                 .toDtoList(shipmentRecordService.getAllShipmentRecordsByPostItemId(postItem));
         return new PostItemTrackingInfo(postItemId, postItem.getStatus(), records);
+    }
+
+    @Override
+    public void receivePostItemByAddressee(long postItemId) {
+        PostItem postItem = postItemRepository.findById(postItemId)
+                .orElseThrow();
+        postItem.setStatus(PostItemStatus.RECEIVED);
+        postItemRepository.save(postItem);
+
+        shipmentRecordService.createItemReceivedRecord(postItem);
     }
 }

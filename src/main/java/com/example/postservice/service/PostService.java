@@ -14,4 +14,6 @@ public interface PostService {
 
     PostItemTrackingInfo getPostItemTrackingInfo(long postItemId);
 
+    void receivePostItemByAddressee(long postItemId);
+
 }

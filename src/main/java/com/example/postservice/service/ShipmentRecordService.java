@@ -16,7 +16,7 @@ public interface ShipmentRecordService {
 
     void createItemDeliveredRecord(PostItem postItem, PostOffice postOffice);
 
-    void createItemReceivedRecord(PostItem postItem, PostOffice postOffice);
+    void createItemReceivedRecord(PostItem postItem);
 
     List<ShipmentRecord> getAllShipmentRecordsByPostItemId(PostItem postItem);
 }
