@@ -6,6 +6,7 @@ import com.example.postservice.dto.response.PostItemTrackingInfo;
 import com.example.postservice.dto.response.ShipmentRecordDto;
 import com.example.postservice.entity.PostItem;
 import com.example.postservice.entity.PostOffice;
+import com.example.postservice.entity.ShipmentRecord;
 import com.example.postservice.enums.PostItemStatus;
 import com.example.postservice.mapper.PostItemMapper;
 import com.example.postservice.mapper.ShipmentRecordMapper;
@@ -67,6 +68,13 @@ public class PostServiceImpl implements PostService {
                 .orElseThrow();
         PostItem postItem = postItemRepository.findById(requestDto.getPostItemId())
                 .orElseThrow();
+        ShipmentRecord lastShipmentRecord = shipmentRecordService.getLastShipmentRecord(postItem);
+
+        if (!postItem.getStatus().equals(PostItemStatus.ACCEPTED) ||
+                lastShipmentRecord.getText().contains(postOffice.getName())) {
+            throw new RuntimeException("PostItem cannot be sent from postOffice where it was not received before");
+        }
+
         postItem.setStatus(PostItemStatus.IN_TRANSIT);
         postItemRepository.save(postItem);
 

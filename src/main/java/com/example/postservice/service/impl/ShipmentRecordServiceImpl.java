@@ -51,6 +51,12 @@ public class ShipmentRecordServiceImpl implements ShipmentRecordService {
         return shipmentRecordRepository.findAllByPostItemOrderByTime(postItem);
     }
 
+    @Override
+    public ShipmentRecord getLastShipmentRecord(PostItem postItem) {
+        return shipmentRecordRepository
+                .findFirstByPostItemOrderByTimeDesc(postItem).orElseThrow();
+    }
+
     private void createShipmentRecord(PostItem postItem, String text) {
         ShipmentRecord shipmentRecord = new ShipmentRecord();
         shipmentRecord.setPostItem(postItem);

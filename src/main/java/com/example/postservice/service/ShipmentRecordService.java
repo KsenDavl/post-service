@@ -19,4 +19,6 @@ public interface ShipmentRecordService {
     void createItemReceivedRecord(PostItem postItem);
 
     List<ShipmentRecord> getAllShipmentRecordsByPostItemId(PostItem postItem);
+
+    ShipmentRecord getLastShipmentRecord(PostItem postItem);
 }
