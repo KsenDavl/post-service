@@ -12,4 +12,11 @@
         </rollback>
     </changeSet>
 
+    <changeSet id="2023-08-16 15:11:00" author="kdavletova">
+        <sqlFile path="sql/16-08-23/02-create-shipment-records.sql" relativeToChangelogFile="true"/>
+        <rollback>
+            <sqlFile path="sql/16-08-23/rollback/02-create-shipment-records-rollback.sql" relativeToChangelogFile="true"/>
+        </rollback>
+    </changeSet>
+
 </databaseChangeLog>

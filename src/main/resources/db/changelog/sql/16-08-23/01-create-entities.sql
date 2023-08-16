@@ -6,7 +6,8 @@ create table post_items (
                           type VARCHAR(64),
                           receiver_index INT,
                           receiver_address VARCHAR(128),
-                          receiver_name VARCHAR(64)
+                          receiver_name VARCHAR(64),
+                          status VARCHAR(64)
 );
 
 create table post_offices (
