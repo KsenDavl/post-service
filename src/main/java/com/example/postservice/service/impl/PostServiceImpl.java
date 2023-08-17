@@ -34,7 +34,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public void registerNewPostItem(NewPostItemDto newPostItemDto) {
+    public PostItem registerNewPostItem(NewPostItemDto newPostItemDto) {
         PostItem postItem = postItemMapper.toPostItem(newPostItemDto);
         postItem.setStatus(PostItemStatus.ACCEPTED);
         postItem = postItemRepository.save(postItem);
@@ -43,16 +43,17 @@ public class PostServiceImpl implements PostService {
 
         shipmentRecordService.createRegistrationRecord(postItem, postOffice);
         shipmentRecordService.createAcceptanceRecord(postItem, postOffice);
+        return postItem;
     }
 
     @Override
     @Transactional
-    public void receivePostItem(PostItemRequestDto requestDto) {
+    public PostItem receivePostItem(PostItemRequestDto requestDto) {
         PostOffice postOffice = postOfficeRepository.findById(requestDto.getPostOfficeIndex())
                 .orElseThrow();
         PostItem postItem = postItemRepository.findById(requestDto.getPostItemId())
                 .orElseThrow();
-        if (requestDto.getPostOfficeIndex() == postItem.getReceiverIndex()) {
+        if (postOffice.getIndex() == postItem.getReceiverIndex()) {
             postItem.setStatus(PostItemStatus.DELIVERED);
             shipmentRecordService.createItemDeliveredRecord(postItem, postOffice);
         } else {
@@ -60,10 +61,12 @@ public class PostServiceImpl implements PostService {
             shipmentRecordService.createAcceptanceRecord(postItem, postOffice);
         }
         postItemRepository.save(postItem);
+        return postItem;
     }
 
     @Override
-    public void dispatchPostItem(PostItemRequestDto requestDto) {
+    @Transactional
+    public PostItem dispatchPostItem(PostItemRequestDto requestDto) {
         PostOffice postOffice = postOfficeRepository.findById(requestDto.getPostOfficeIndex())
                 .orElseThrow();
         PostItem postItem = postItemRepository.findById(requestDto.getPostItemId())
@@ -71,7 +74,7 @@ public class PostServiceImpl implements PostService {
         ShipmentRecord lastShipmentRecord = shipmentRecordService.getLastShipmentRecord(postItem);
 
         if (!postItem.getStatus().equals(PostItemStatus.ACCEPTED) ||
-                lastShipmentRecord.getText().contains(postOffice.getName())) {
+                !lastShipmentRecord.getText().contains(postOffice.getName())) {
             throw new RuntimeException("PostItem cannot be sent from postOffice where it was not received before");
         }
 
@@ -79,9 +82,11 @@ public class PostServiceImpl implements PostService {
         postItemRepository.save(postItem);
 
         shipmentRecordService.createDepartureRecord(postItem, postOffice);
+        return postItem;
     }
 
     @Override
+    @Transactional
     public PostItemTrackingInfo getPostItemTrackingInfo(long postItemId) {
         PostItem postItem = postItemRepository.findById(postItemId)
                 .orElseThrow();
@@ -91,12 +96,14 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public void receivePostItemByAddressee(long postItemId) {
+    @Transactional
+    public PostItem receivePostItemByAddressee(long postItemId) {
         PostItem postItem = postItemRepository.findById(postItemId)
                 .orElseThrow();
         postItem.setStatus(PostItemStatus.RECEIVED);
         postItemRepository.save(postItem);
 
         shipmentRecordService.createItemReceivedRecord(postItem);
+        return postItem;
     }
 }

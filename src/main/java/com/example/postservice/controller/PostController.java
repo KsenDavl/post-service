@@ -5,6 +5,7 @@ import com.example.postservice.dto.request.PostItemRequestDto;
 import com.example.postservice.dto.response.PostItemTrackingInfo;
 import com.example.postservice.service.PostService;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,7 +24,7 @@ public class PostController {
     @PostMapping("/post/new")
     public ResponseEntity<Void> registerNewPostItem(@RequestBody NewPostItemDto newPostItemDto) {
         postService.registerNewPostItem(newPostItemDto);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @PostMapping("/post/in")

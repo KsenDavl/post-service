@@ -3,17 +3,18 @@ package com.example.postservice.service;
 import com.example.postservice.dto.request.NewPostItemDto;
 import com.example.postservice.dto.request.PostItemRequestDto;
 import com.example.postservice.dto.response.PostItemTrackingInfo;
+import com.example.postservice.entity.PostItem;
 
 public interface PostService {
 
-    void registerNewPostItem(NewPostItemDto newPostItemDto);
+    PostItem registerNewPostItem(NewPostItemDto newPostItemDto);
 
-    void receivePostItem(PostItemRequestDto requestDto);
+    PostItem receivePostItem(PostItemRequestDto requestDto);
 
-    void dispatchPostItem(PostItemRequestDto requestDto);
+    PostItem dispatchPostItem(PostItemRequestDto requestDto);
 
     PostItemTrackingInfo getPostItemTrackingInfo(long postItemId);
 
-    void receivePostItemByAddressee(long postItemId);
+    PostItem receivePostItemByAddressee(long postItemId);
 
 }
