@@ -1,15 +1,12 @@
 package com.example.postservice.unit.service;
 
 import com.example.postservice.dto.request.PostItemRequestDto;
-import com.example.postservice.dto.response.PostItemTrackingInfo;
 import com.example.postservice.entity.PostItem;
 import com.example.postservice.entity.PostOffice;
 import com.example.postservice.entity.ShipmentRecord;
 import com.example.postservice.enums.PostItemStatus;
 import com.example.postservice.enums.PostItemType;
 import com.example.postservice.repository.PostItemRepository;
-import com.example.postservice.repository.PostOfficeRepository;
-import com.example.postservice.repository.ShipmentRecordRepository;
 import com.example.postservice.service.PostOfficeService;
 import com.example.postservice.service.ShipmentRecordService;
 import com.example.postservice.service.impl.PostServiceImpl;
@@ -21,10 +18,10 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -57,12 +54,12 @@ class PostServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        postItem = new PostItem(POST_ITEM_ID, TYPE, RECEIVER_INDEX, RECEIVER_ADDRESS, RECEIVER_NAME, null);
+        postItem = new PostItem(POST_ITEM_ID, TYPE, RECEIVER_INDEX, RECEIVER_ADDRESS, RECEIVER_NAME, PostItemStatus.ACCEPTED);
         requestDto = new PostItemRequestDto(postItem.getId(), INDEX);
         postOffice = new PostOffice(INDEX, OFFICE_NAME, OFFICE_ADDRESS);
         shipmentRecord = new ShipmentRecord(3, postItem,
                 "Accepted at temporary facility: " + OFFICE_NAME, LocalDateTime.now());
-    };
+    }
 
     @Test
     void shouldSetStatusAcceptedWhenIndexNotEqualReceiverIndex() {
@@ -85,8 +82,6 @@ class PostServiceImplTest {
 
     @Test
     void shouldSetStatusInTransit(){
-        postItem.setStatus(PostItemStatus.ACCEPTED);
-
         when(postItemRepository.findById(POST_ITEM_ID)).thenReturn(Optional.ofNullable(postItem));
         when(postOfficeService.getPostOfficeByIndex(INDEX)).thenReturn(postOffice);
         when(shipmentRecordService.getLastShipmentRecord(postItem)).thenReturn(shipmentRecord);
@@ -97,14 +92,12 @@ class PostServiceImplTest {
 
     @Test
     void shouldReturnExceptionWhenTryToSendOutIfPostItemNotInStatusAccepted(){
+        postItem.setStatus(PostItemStatus.IN_TRANSIT);
         when(postItemRepository.findById(POST_ITEM_ID)).thenReturn(Optional.ofNullable(postItem));
         when(postOfficeService.getPostOfficeByIndex(INDEX)).thenReturn(postOffice);
         when(shipmentRecordService.getLastShipmentRecord(postItem)).thenReturn(shipmentRecord);
 
-        assertThrows(RuntimeException.class, () -> {
-            postService.dispatchPostItem(requestDto);
-        });
-
+        assertThrows(IllegalArgumentException.class, () -> postService.dispatchPostItem(requestDto));
     }
 
     @Test

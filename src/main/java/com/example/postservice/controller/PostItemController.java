@@ -3,6 +3,7 @@ package com.example.postservice.controller;
 import com.example.postservice.dto.request.NewPostItemDto;
 import com.example.postservice.dto.request.PostItemRequestDto;
 import com.example.postservice.dto.response.PostItemTrackingInfo;
+import com.example.postservice.entity.PostItem;
 import com.example.postservice.service.PostService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -22,9 +23,9 @@ public class PostItemController {
     private final PostService postService;
 
     @PostMapping("/post-item/new")
-    public ResponseEntity<Void> registerNewPostItem(@RequestBody NewPostItemDto newPostItemDto) {
-        postService.registerNewPostItem(newPostItemDto);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+    public ResponseEntity<String> registerNewPostItem(@RequestBody NewPostItemDto newPostItemDto) {
+        PostItem postItem = postService.registerNewPostItem(newPostItemDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body("Created post item with id = " + postItem.getId());
     }
 
     @PostMapping("/post-item/in")

@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Service
 @AllArgsConstructor
@@ -16,7 +17,8 @@ public class PostOfficeServiceImpl implements PostOfficeService {
 
     @Override
     public PostOffice getPostOfficeByIndex(int index) {
-        return postOfficeRepository.findById(index).orElseThrow();
+        return postOfficeRepository.findById(index)
+                .orElseThrow(() -> new NoSuchElementException(String.format("No post office with index = %s found", index)));
     }
 
     @Override

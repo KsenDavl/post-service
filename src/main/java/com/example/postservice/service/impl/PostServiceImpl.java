@@ -19,10 +19,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Service
 @AllArgsConstructor
 public class PostServiceImpl implements PostService {
+
+    private static final String NSE_EXCEPTION_TEST = "No post item with id = %d found";
 
     private final PostItemRepository postItemRepository;
 
@@ -48,9 +51,15 @@ public class PostServiceImpl implements PostService {
     @Override
     @Transactional
     public PostItem receivePostItem(PostItemRequestDto requestDto) {
-        PostOffice postOffice = postOfficeService.getPostOfficeByIndex(requestDto.getPostOfficeIndex());
         PostItem postItem = postItemRepository.findById(requestDto.getPostItemId())
-                .orElseThrow();
+                .orElseThrow(() -> new NoSuchElementException(String.format(NSE_EXCEPTION_TEST, requestDto.getPostItemId())));
+
+        if (!postItem.getStatus().equals(PostItemStatus.IN_TRANSIT)) {
+            throw new IllegalArgumentException("Cannot receive post item that is not in status IN_TRANSIT");
+        }
+
+        PostOffice postOffice = postOfficeService.getPostOfficeByIndex(requestDto.getPostOfficeIndex());
+
         if (postOffice.getIndex() == postItem.getReceiverIndex()) {
             postItem.setStatus(PostItemStatus.DELIVERED);
             shipmentRecordService.createItemDeliveredRecord(postItem, postOffice);
@@ -67,12 +76,12 @@ public class PostServiceImpl implements PostService {
     public PostItem dispatchPostItem(PostItemRequestDto requestDto) {
         PostOffice postOffice = postOfficeService.getPostOfficeByIndex(requestDto.getPostOfficeIndex());
         PostItem postItem = postItemRepository.findById(requestDto.getPostItemId())
-                .orElseThrow();
+                .orElseThrow(() -> new NoSuchElementException(String.format(NSE_EXCEPTION_TEST, requestDto.getPostItemId())));
         ShipmentRecord lastShipmentRecord = shipmentRecordService.getLastShipmentRecord(postItem);
 
         if (!postItem.getStatus().equals(PostItemStatus.ACCEPTED) ||
                 !lastShipmentRecord.getText().contains(postOffice.getName())) {
-            throw new RuntimeException("PostItem cannot be sent from postOffice where it was not received before");
+            throw new IllegalArgumentException("PostItem cannot be sent from postOffice where it was not received");
         }
 
         postItem.setStatus(PostItemStatus.IN_TRANSIT);
@@ -86,7 +95,7 @@ public class PostServiceImpl implements PostService {
     @Transactional
     public PostItemTrackingInfo getPostItemTrackingInfo(long postItemId) {
         PostItem postItem = postItemRepository.findById(postItemId)
-                .orElseThrow();
+                .orElseThrow(() -> new NoSuchElementException(String.format(NSE_EXCEPTION_TEST, postItemId)));
         List<ShipmentRecordDto> records = shipmentRecordMapper
                 .toDtoList(shipmentRecordService.getAllShipmentRecordsByPostItemId(postItem));
         return new PostItemTrackingInfo(postItemId, postItem.getStatus(), records);
@@ -96,7 +105,11 @@ public class PostServiceImpl implements PostService {
     @Transactional
     public PostItem receivePostItemByAddressee(long postItemId) {
         PostItem postItem = postItemRepository.findById(postItemId)
-                .orElseThrow();
+                .orElseThrow(() -> new NoSuchElementException(String.format(NSE_EXCEPTION_TEST, postItemId)));
+        if (!postItem.getStatus().equals(PostItemStatus.DELIVERED)) {
+            throw new IllegalArgumentException("The post item is not yet delivered to destination facility, " +
+                    "it cannot be received");
+        }
         postItem.setStatus(PostItemStatus.RECEIVED);
         postItemRepository.save(postItem);
 

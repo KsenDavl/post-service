@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Service
 @AllArgsConstructor
@@ -53,8 +54,8 @@ public class ShipmentRecordServiceImpl implements ShipmentRecordService {
 
     @Override
     public ShipmentRecord getLastShipmentRecord(PostItem postItem) {
-        return shipmentRecordRepository
-                .findFirstByPostItemOrderByTimeDesc(postItem).orElseThrow();
+        return shipmentRecordRepository.findFirstByPostItemOrderByTimeDesc(postItem)
+                .orElseThrow(() -> new NoSuchElementException("No records for postItem = " + postItem.getId()));
     }
 
     private void createShipmentRecord(PostItem postItem, String text) {

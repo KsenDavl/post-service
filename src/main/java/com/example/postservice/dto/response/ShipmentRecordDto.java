@@ -9,8 +9,6 @@ public class ShipmentRecordDto {
 
     private long id;
 
-    private long postItemId;
-
     private String text;
 
     LocalDateTime time;
