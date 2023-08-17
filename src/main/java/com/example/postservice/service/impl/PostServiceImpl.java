@@ -11,7 +11,7 @@ import com.example.postservice.enums.PostItemStatus;
 import com.example.postservice.mapper.PostItemMapper;
 import com.example.postservice.mapper.ShipmentRecordMapper;
 import com.example.postservice.repository.PostItemRepository;
-import com.example.postservice.repository.PostOfficeRepository;
+import com.example.postservice.service.PostOfficeService;
 import com.example.postservice.service.PostService;
 import com.example.postservice.service.ShipmentRecordService;
 import lombok.AllArgsConstructor;
@@ -25,9 +25,9 @@ import java.util.List;
 public class PostServiceImpl implements PostService {
 
     private final PostItemRepository postItemRepository;
-    private final PostOfficeRepository postOfficeRepository;
 
     private final ShipmentRecordService shipmentRecordService;
+    private final PostOfficeService postOfficeService;
 
     private final PostItemMapper postItemMapper;
     private final ShipmentRecordMapper shipmentRecordMapper;
@@ -38,8 +38,7 @@ public class PostServiceImpl implements PostService {
         PostItem postItem = postItemMapper.toPostItem(newPostItemDto);
         postItem.setStatus(PostItemStatus.ACCEPTED);
         postItem = postItemRepository.save(postItem);
-        PostOffice postOffice = postOfficeRepository.findById(newPostItemDto.getSenderIndex())
-                        .orElseThrow();
+        PostOffice postOffice = postOfficeService.getPostOfficeByIndex(newPostItemDto.getSenderIndex());
 
         shipmentRecordService.createRegistrationRecord(postItem, postOffice);
         shipmentRecordService.createAcceptanceRecord(postItem, postOffice);
@@ -49,8 +48,7 @@ public class PostServiceImpl implements PostService {
     @Override
     @Transactional
     public PostItem receivePostItem(PostItemRequestDto requestDto) {
-        PostOffice postOffice = postOfficeRepository.findById(requestDto.getPostOfficeIndex())
-                .orElseThrow();
+        PostOffice postOffice = postOfficeService.getPostOfficeByIndex(requestDto.getPostOfficeIndex());
         PostItem postItem = postItemRepository.findById(requestDto.getPostItemId())
                 .orElseThrow();
         if (postOffice.getIndex() == postItem.getReceiverIndex()) {
@@ -67,8 +65,7 @@ public class PostServiceImpl implements PostService {
     @Override
     @Transactional
     public PostItem dispatchPostItem(PostItemRequestDto requestDto) {
-        PostOffice postOffice = postOfficeRepository.findById(requestDto.getPostOfficeIndex())
-                .orElseThrow();
+        PostOffice postOffice = postOfficeService.getPostOfficeByIndex(requestDto.getPostOfficeIndex());
         PostItem postItem = postItemRepository.findById(requestDto.getPostItemId())
                 .orElseThrow();
         ShipmentRecord lastShipmentRecord = shipmentRecordService.getLastShipmentRecord(postItem);

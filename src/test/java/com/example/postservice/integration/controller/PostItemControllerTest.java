@@ -25,7 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @Sql(scripts = "classpath:data/01-init_test_data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 @EnableSpringDataWebSupport
-class PostControllerTest extends AbstractIntegrationTest {
+class PostItemControllerTest extends AbstractIntegrationTest {
 
     private final static long POST_ITEM_ID = 7;
     private final static PostItemType TYPE = PostItemType.SMALL_PARCEL;
@@ -46,7 +46,7 @@ class PostControllerTest extends AbstractIntegrationTest {
 
         int sizeBeforeInsert = postItemRepository.findAll().size();
 
-        mockMvc.perform(post(UriComponentsBuilder.fromPath("/api/v1/post/new").toUriString())
+        mockMvc.perform(post(UriComponentsBuilder.fromPath("/api/v1/post-item/new").toUriString())
                         .contentType(APPLICATION_JSON)
                         .content(toJson(dto)))
                 .andExpect(status().is(HttpStatus.CREATED.value()));
@@ -61,7 +61,7 @@ class PostControllerTest extends AbstractIntegrationTest {
 
         PostItem postItemBeforeUpdate = postItemRepository.findById(POST_ITEM_ID).get();
 
-        mockMvc.perform(post(UriComponentsBuilder.fromPath("/api/v1/post/in").toUriString())
+        mockMvc.perform(post(UriComponentsBuilder.fromPath("/api/v1/post-item/in").toUriString())
                         .contentType(APPLICATION_JSON)
                         .content(toJson(dto)))
                 .andExpect(status().is(OK_STATUS.value()));
@@ -79,7 +79,7 @@ class PostControllerTest extends AbstractIntegrationTest {
 
         PostItem postItemBeforeUpdate = postItemRepository.findById(itemId).get();
 
-        mockMvc.perform(post(UriComponentsBuilder.fromPath("/api/v1/post/out").toUriString())
+        mockMvc.perform(post(UriComponentsBuilder.fromPath("/api/v1/post-item/out").toUriString())
                         .contentType(APPLICATION_JSON)
                         .content(toJson(dto)))
                 .andExpect(status().is(OK_STATUS.value()));
@@ -92,7 +92,7 @@ class PostControllerTest extends AbstractIntegrationTest {
 
     @Test
     void shouldReturn_TrackingRecords() throws Exception {
-        mockMvc.perform(get(UriComponentsBuilder.fromPath("/api/v1/post/tracking/" + POST_ITEM_ID).toUriString()))
+        mockMvc.perform(get(UriComponentsBuilder.fromPath("/api/v1/post-item/tracking/" + POST_ITEM_ID).toUriString()))
                 .andExpect(status().is(OK_STATUS.value()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.records", hasSize(3)));
     }
@@ -102,7 +102,7 @@ class PostControllerTest extends AbstractIntegrationTest {
         long itemId = 9l;
         PostItem postItemBeforeUpdate = postItemRepository.findById(itemId).get();
 
-        mockMvc.perform(post(UriComponentsBuilder.fromPath("/api/v1/post/receiving/" + itemId).toUriString()))
+        mockMvc.perform(post(UriComponentsBuilder.fromPath("/api/v1/post-item/receiving/" + itemId).toUriString()))
                                 .andExpect(status().is(OK_STATUS.value()));
 
         PostItem postItemAfterUpdate = postItemRepository.findById(itemId).get();

@@ -10,6 +10,7 @@ import com.example.postservice.enums.PostItemType;
 import com.example.postservice.repository.PostItemRepository;
 import com.example.postservice.repository.PostOfficeRepository;
 import com.example.postservice.repository.ShipmentRecordRepository;
+import com.example.postservice.service.PostOfficeService;
 import com.example.postservice.service.ShipmentRecordService;
 import com.example.postservice.service.impl.PostServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
@@ -50,7 +51,7 @@ class PostServiceImplTest {
     @Spy
     private PostItemRepository postItemRepository;
     @Spy
-    private PostOfficeRepository postOfficeRepository;
+    private PostOfficeService postOfficeService;
     @Spy
     private ShipmentRecordService shipmentRecordService;
 
@@ -66,7 +67,7 @@ class PostServiceImplTest {
     @Test
     void shouldSetStatusAcceptedWhenIndexNotEqualReceiverIndex() {
        when(postItemRepository.findById(POST_ITEM_ID)).thenReturn(Optional.ofNullable(postItem));
-       when(postOfficeRepository.findById(INDEX)).thenReturn(Optional.ofNullable(postOffice));
+       when(postOfficeService.getPostOfficeByIndex(INDEX)).thenReturn(postOffice);
 
        PostItem resultPostItem = postService.receivePostItem(requestDto);
        assertEquals(PostItemStatus.ACCEPTED, resultPostItem.getStatus());
@@ -76,7 +77,7 @@ class PostServiceImplTest {
     void shouldSetStatusDeliveredWhenIndexEqualReceiverIndex() {
         postOffice.setIndex(RECEIVER_INDEX);
         when(postItemRepository.findById(POST_ITEM_ID)).thenReturn(Optional.ofNullable(postItem));
-        when(postOfficeRepository.findById(INDEX)).thenReturn(Optional.ofNullable(postOffice));
+        when(postOfficeService.getPostOfficeByIndex(INDEX)).thenReturn(postOffice);
 
         PostItem resultPostItem = postService.receivePostItem(requestDto);
         assertEquals(PostItemStatus.DELIVERED, resultPostItem.getStatus());
@@ -87,7 +88,7 @@ class PostServiceImplTest {
         postItem.setStatus(PostItemStatus.ACCEPTED);
 
         when(postItemRepository.findById(POST_ITEM_ID)).thenReturn(Optional.ofNullable(postItem));
-        when(postOfficeRepository.findById(INDEX)).thenReturn(Optional.ofNullable(postOffice));
+        when(postOfficeService.getPostOfficeByIndex(INDEX)).thenReturn(postOffice);
         when(shipmentRecordService.getLastShipmentRecord(postItem)).thenReturn(shipmentRecord);
 
         PostItem resultPostItem = postService.dispatchPostItem(requestDto);
@@ -97,7 +98,7 @@ class PostServiceImplTest {
     @Test
     void shouldReturnExceptionWhenTryToSendOutIfPostItemNotInStatusAccepted(){
         when(postItemRepository.findById(POST_ITEM_ID)).thenReturn(Optional.ofNullable(postItem));
-        when(postOfficeRepository.findById(INDEX)).thenReturn(Optional.ofNullable(postOffice));
+        when(postOfficeService.getPostOfficeByIndex(INDEX)).thenReturn(postOffice);
         when(shipmentRecordService.getLastShipmentRecord(postItem)).thenReturn(shipmentRecord);
 
         assertThrows(RuntimeException.class, () -> {
@@ -112,7 +113,7 @@ class PostServiceImplTest {
         shipmentRecord.setText("Accepted at temporary facility: Some other post office");
 
         when(postItemRepository.findById(POST_ITEM_ID)).thenReturn(Optional.ofNullable(postItem));
-        when(postOfficeRepository.findById(INDEX)).thenReturn(Optional.ofNullable(postOffice));
+        when(postOfficeService.getPostOfficeByIndex(INDEX)).thenReturn(postOffice);
         when(shipmentRecordService.getLastShipmentRecord(postItem)).thenReturn(shipmentRecord);
 
         assertThrows(RuntimeException.class, () -> postService.dispatchPostItem(requestDto));

@@ -17,34 +17,34 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @AllArgsConstructor
 @RequestMapping("api/v1")
-public class PostController {
+public class PostItemController {
 
     private final PostService postService;
 
-    @PostMapping("/post/new")
+    @PostMapping("/post-item/new")
     public ResponseEntity<Void> registerNewPostItem(@RequestBody NewPostItemDto newPostItemDto) {
         postService.registerNewPostItem(newPostItemDto);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    @PostMapping("/post/in")
+    @PostMapping("/post-item/in")
     public void receivePostItem(@RequestBody PostItemRequestDto requestDto) {
         postService.receivePostItem(requestDto);
         ResponseEntity.ok().build();
     }
 
-    @PostMapping("post/out")
+    @PostMapping("post-item/out")
     public void dispatchPostItem(@RequestBody PostItemRequestDto requestDto) {
         postService.dispatchPostItem(requestDto);
         ResponseEntity.ok().build();
     }
 
-    @GetMapping("/post/tracking/{postItemId}")
+    @GetMapping("/post-item/tracking/{postItemId}")
     public ResponseEntity<PostItemTrackingInfo> getPostItemTrackingInfo(@PathVariable long postItemId) {
         return ResponseEntity.ok().body(postService.getPostItemTrackingInfo(postItemId));
     }
 
-    @PostMapping("post/receiving/{postItemId}")
+    @PostMapping("post-item/receiving/{postItemId}")
     public ResponseEntity<Void> receivePostItemByAddressee(@PathVariable long postItemId) {
         postService.receivePostItemByAddressee(postItemId);
         return ResponseEntity.ok().build();
