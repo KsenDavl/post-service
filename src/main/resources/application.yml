@@ -1,4 +1,3 @@
-
 spring:
   liquibase:
     change-log: classpath:/db/changelog/changelog-master.xml
@@ -7,3 +6,5 @@ spring:
     url: jdbc:postgresql://ec2-99-80-190-165.eu-west-1.compute.amazonaws.com:5432/dbht0b6kdmteji
     username: qpwhbxqesilsnu
     password: 6cebe2b2c00a8cc964914ebe2297cda0b52d017aa7a80719865e0ef806d79c5a
+server:
+  port: ${PORT:5000}
