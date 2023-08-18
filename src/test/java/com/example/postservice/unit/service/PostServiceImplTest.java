@@ -11,6 +11,7 @@ import com.example.postservice.service.PostOfficeService;
 import com.example.postservice.service.ShipmentRecordService;
 import com.example.postservice.service.impl.PostServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -25,6 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
+@DisplayName("PostService должен ")
 class PostServiceImplTest {
 
     private final static long POST_ITEM_ID = 10;
@@ -62,6 +64,7 @@ class PostServiceImplTest {
     }
 
     @Test
+    @DisplayName("установить статус 'ACCEPTED' при получении посылки если индекс отделения != индексу получителя")
     void shouldSetStatusAcceptedWhenIndexNotEqualReceiverIndex() {
        when(postItemRepository.findById(POST_ITEM_ID)).thenReturn(Optional.ofNullable(postItem));
        when(postOfficeService.getPostOfficeByIndex(INDEX)).thenReturn(postOffice);
@@ -71,6 +74,7 @@ class PostServiceImplTest {
     }
 
     @Test
+    @DisplayName("установить статус 'DELIVERED' при получении посылки если индекс отделения = индексу получителя")
     void shouldSetStatusDeliveredWhenIndexEqualReceiverIndex() {
         postOffice.setIndex(RECEIVER_INDEX);
         when(postItemRepository.findById(POST_ITEM_ID)).thenReturn(Optional.ofNullable(postItem));
@@ -81,6 +85,7 @@ class PostServiceImplTest {
     }
 
     @Test
+    @DisplayName("выбросить исключение при получении посылки, которая не была в статусе 'IN_TRANSIT' (в пути)")
     void shouldThrowExceptionWhenTryToReceivePostItemNotInStatusInTransit() {
         postItem.setStatus(PostItemStatus.ACCEPTED);
         when(postItemRepository.findById(POST_ITEM_ID)).thenReturn(Optional.ofNullable(postItem));
@@ -89,7 +94,8 @@ class PostServiceImplTest {
     }
 
     @Test
-    void shouldSetStatusInTransit(){
+    @DisplayName("установить статус 'IN_TRANSIT' при отправлении посылки")
+    void shouldSetStatusInTransitWhenDispatchPostItem(){
         postItem.setStatus(PostItemStatus.ACCEPTED);
         when(postItemRepository.findById(POST_ITEM_ID)).thenReturn(Optional.ofNullable(postItem));
         when(postOfficeService.getPostOfficeByIndex(INDEX)).thenReturn(postOffice);
@@ -100,7 +106,8 @@ class PostServiceImplTest {
     }
 
     @Test
-    void shouldReturnExceptionWhenTryToSendOutIfPostItemNotInStatusAccepted(){
+    @DisplayName("выбросить исключение при попытке отправки посылки не в статусе 'ACCEPTED'")
+    void shouldThrowExceptionWhenTryToSendOutIfPostItemNotInStatusAccepted(){
         when(postItemRepository.findById(POST_ITEM_ID)).thenReturn(Optional.ofNullable(postItem));
         when(postOfficeService.getPostOfficeByIndex(INDEX)).thenReturn(postOffice);
         when(shipmentRecordService.getLastShipmentRecord(postItem)).thenReturn(shipmentRecord);
@@ -109,7 +116,8 @@ class PostServiceImplTest {
     }
 
     @Test
-    void shouldReturnExceptionWhenTryToSendOutIfPostItemWasNotAcceptedByThisOffice(){
+    @DisplayName("выбросить исключение при отправления посылки, которая не была получена этим отделением")
+    void shouldThrowExceptionWhenTryToSendOutIfPostItemWasNotAcceptedByThisOffice(){
         postItem.setStatus(PostItemStatus.ACCEPTED);
         shipmentRecord.setText("Accepted at temporary facility: Some other post office");
 
@@ -121,17 +129,7 @@ class PostServiceImplTest {
     }
 
     @Test
-    void shouldThrowIllegalArgumentExceptionWhenTryToSendOutAndPostItemNotInStatusAccepted() {
-        when(postItemRepository.findById(POST_ITEM_ID)).thenReturn(Optional.ofNullable(postItem));
-        when(postOfficeService.getPostOfficeByIndex(INDEX)).thenReturn(postOffice);
-        when(shipmentRecordService.getLastShipmentRecord(postItem)).thenReturn(shipmentRecord);
-
-        assertThrows(IllegalArgumentException.class, () -> postService.dispatchPostItem(requestDto));
-    }
-
-
-    //todo тест на случай если не в статусе delivered
-    @Test
+    @DisplayName("установить статус 'RECEIVED' при получении посылки адресатом")
     void shouldSetStatusReceived() {
         postItem.setStatus(PostItemStatus.DELIVERED);
         when(postItemRepository.findById(POST_ITEM_ID)).thenReturn(Optional.ofNullable(postItem));
@@ -141,6 +139,7 @@ class PostServiceImplTest {
     }
 
     @Test
+    @DisplayName("выбросить исключение при получении посылки не в статусе 'DELIVERED'")
     void shouldThrowExceptionWhenTryToReceiveByAddresseeAndPostItemNotInStatusDelivered() {
         when(postItemRepository.findById(POST_ITEM_ID)).thenReturn(Optional.ofNullable(postItem));
 

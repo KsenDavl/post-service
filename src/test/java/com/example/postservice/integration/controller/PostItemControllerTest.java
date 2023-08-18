@@ -74,7 +74,7 @@ class PostItemControllerTest extends AbstractIntegrationTest {
 
     @Test
     void shouldReturnOkWhenDispatchingPostItem() throws Exception{
-        long itemId = 5l;
+        long itemId = 5L;
         PostItemRequestDto dto = new PostItemRequestDto(itemId, 438034);
 
         PostItem postItemBeforeUpdate = postItemRepository.findById(itemId).get();
@@ -91,7 +91,7 @@ class PostItemControllerTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void shouldReturn_TrackingRecords() throws Exception {
+    void shouldReturn3TrackingRecords() throws Exception {
         mockMvc.perform(get(UriComponentsBuilder.fromPath("/api/v1/post-item/tracking/" + POST_ITEM_ID).toUriString()))
                 .andExpect(status().is(OK_STATUS.value()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.records", hasSize(3)));
@@ -99,7 +99,7 @@ class PostItemControllerTest extends AbstractIntegrationTest {
 
     @Test
     void shouldReturnOkWhenReceivingByAddressee() throws Exception{
-        long itemId = 9l;
+        long itemId = 9L;
         PostItem postItemBeforeUpdate = postItemRepository.findById(itemId).get();
 
         mockMvc.perform(post(UriComponentsBuilder.fromPath("/api/v1/post-item/receiving/" + itemId).toUriString()))
