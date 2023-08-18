@@ -61,7 +61,7 @@ class PostServiceImplTest {
                 "Accepted at temporary facility: " + OFFICE_NAME, LocalDateTime.now());
     }
 
-    @Test //todo тест на случай если не в статусе IN_TRANSIT
+    @Test
     void shouldSetStatusAcceptedWhenIndexNotEqualReceiverIndex() {
        when(postItemRepository.findById(POST_ITEM_ID)).thenReturn(Optional.ofNullable(postItem));
        when(postOfficeService.getPostOfficeByIndex(INDEX)).thenReturn(postOffice);
@@ -81,7 +81,15 @@ class PostServiceImplTest {
     }
 
     @Test
-    void shouldSetStatusInTransit(){ //todo тест на случай если не в статусе ACCEPTED
+    void shouldThrowExceptionWhenTryToReceivePostItemNotInStatusInTransit() {
+        postItem.setStatus(PostItemStatus.ACCEPTED);
+        when(postItemRepository.findById(POST_ITEM_ID)).thenReturn(Optional.ofNullable(postItem));
+
+        assertThrows(IllegalArgumentException.class, () -> postService.receivePostItem(requestDto));
+    }
+
+    @Test
+    void shouldSetStatusInTransit(){
         postItem.setStatus(PostItemStatus.ACCEPTED);
         when(postItemRepository.findById(POST_ITEM_ID)).thenReturn(Optional.ofNullable(postItem));
         when(postOfficeService.getPostOfficeByIndex(INDEX)).thenReturn(postOffice);
@@ -112,6 +120,16 @@ class PostServiceImplTest {
         assertThrows(RuntimeException.class, () -> postService.dispatchPostItem(requestDto));
     }
 
+    @Test
+    void shouldThrowIllegalArgumentExceptionWhenTryToSendOutAndPostItemNotInStatusAccepted() {
+        when(postItemRepository.findById(POST_ITEM_ID)).thenReturn(Optional.ofNullable(postItem));
+        when(postOfficeService.getPostOfficeByIndex(INDEX)).thenReturn(postOffice);
+        when(shipmentRecordService.getLastShipmentRecord(postItem)).thenReturn(shipmentRecord);
+
+        assertThrows(IllegalArgumentException.class, () -> postService.dispatchPostItem(requestDto));
+    }
+
+
     //todo тест на случай если не в статусе delivered
     @Test
     void shouldSetStatusReceived() {
@@ -120,5 +138,12 @@ class PostServiceImplTest {
 
         PostItem resultPostItem = postService.receivePostItemByAddressee(POST_ITEM_ID);
         assertEquals(PostItemStatus.RECEIVED, resultPostItem.getStatus());
+    }
+
+    @Test
+    void shouldThrowExceptionWhenTryToReceiveByAddresseeAndPostItemNotInStatusDelivered() {
+        when(postItemRepository.findById(POST_ITEM_ID)).thenReturn(Optional.ofNullable(postItem));
+
+        assertThrows(IllegalArgumentException.class, () -> postService.receivePostItemByAddressee(POST_ITEM_ID));
     }
 }
