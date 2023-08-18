@@ -10,9 +10,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class PostItemRequestDto {
 
-    @Schema(example = "1")
+    @Schema(name = "Идентификатор почтового отправления", example = "1")
     private long postItemId;
 
-    @Schema(example = "546372", maxLength = 9)
+    @Schema(name = "Индекс почтового отделения", example = "546372", maxLength = 9)
     private int postOfficeIndex;
 }

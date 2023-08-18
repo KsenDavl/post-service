@@ -11,18 +11,18 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class NewPostItemDto {
 
-    @Schema(example = "LETTER", enumAsRef = true)
+    @Schema(name = "Тип почтового отправления", example = "LETTER", enumAsRef = true)
     private PostItemType type;
 
-    @Schema(example = "111111", maxLength = 9)
+    @Schema(name = "Индекс получателя", example = "111111", maxLength = 9)
     private int receiverIndex;
 
-    @Schema(example = "Kipling st, 43")
+    @Schema(name = "Адрес получателя", example = "Kipling st, 43")
     private String receiverAddress;
 
-    @Schema(example = "Max Smith")
+    @Schema(name = "Имя получателя", example = "Max Smith")
     private String receiverName;
 
-    @Schema(example = "222222", maxLength = 9)
+    @Schema(name = "Индекс отправителя", example = "222222", maxLength = 9)
     private int senderIndex;
 }
