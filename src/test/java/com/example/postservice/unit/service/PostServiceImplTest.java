@@ -54,14 +54,14 @@ class PostServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        postItem = new PostItem(POST_ITEM_ID, TYPE, RECEIVER_INDEX, RECEIVER_ADDRESS, RECEIVER_NAME, PostItemStatus.ACCEPTED);
+        postItem = new PostItem(POST_ITEM_ID, TYPE, RECEIVER_INDEX, RECEIVER_ADDRESS, RECEIVER_NAME, PostItemStatus.IN_TRANSIT);
         requestDto = new PostItemRequestDto(postItem.getId(), INDEX);
         postOffice = new PostOffice(INDEX, OFFICE_NAME, OFFICE_ADDRESS);
         shipmentRecord = new ShipmentRecord(3, postItem,
                 "Accepted at temporary facility: " + OFFICE_NAME, LocalDateTime.now());
     }
 
-    @Test
+    @Test //todo тест на случай если не в статусе IN_TRANSIT
     void shouldSetStatusAcceptedWhenIndexNotEqualReceiverIndex() {
        when(postItemRepository.findById(POST_ITEM_ID)).thenReturn(Optional.ofNullable(postItem));
        when(postOfficeService.getPostOfficeByIndex(INDEX)).thenReturn(postOffice);
@@ -81,7 +81,8 @@ class PostServiceImplTest {
     }
 
     @Test
-    void shouldSetStatusInTransit(){
+    void shouldSetStatusInTransit(){ //todo тест на случай если не в статусе ACCEPTED
+        postItem.setStatus(PostItemStatus.ACCEPTED);
         when(postItemRepository.findById(POST_ITEM_ID)).thenReturn(Optional.ofNullable(postItem));
         when(postOfficeService.getPostOfficeByIndex(INDEX)).thenReturn(postOffice);
         when(shipmentRecordService.getLastShipmentRecord(postItem)).thenReturn(shipmentRecord);
@@ -92,7 +93,6 @@ class PostServiceImplTest {
 
     @Test
     void shouldReturnExceptionWhenTryToSendOutIfPostItemNotInStatusAccepted(){
-        postItem.setStatus(PostItemStatus.IN_TRANSIT);
         when(postItemRepository.findById(POST_ITEM_ID)).thenReturn(Optional.ofNullable(postItem));
         when(postOfficeService.getPostOfficeByIndex(INDEX)).thenReturn(postOffice);
         when(shipmentRecordService.getLastShipmentRecord(postItem)).thenReturn(shipmentRecord);
@@ -112,8 +112,10 @@ class PostServiceImplTest {
         assertThrows(RuntimeException.class, () -> postService.dispatchPostItem(requestDto));
     }
 
+    //todo тест на случай если не в статусе delivered
     @Test
     void shouldSetStatusReceived() {
+        postItem.setStatus(PostItemStatus.DELIVERED);
         when(postItemRepository.findById(POST_ITEM_ID)).thenReturn(Optional.ofNullable(postItem));
 
         PostItem resultPostItem = postService.receivePostItemByAddressee(POST_ITEM_ID);
