@@ -92,7 +92,6 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    @Transactional
     public PostItemTrackingInfo getPostItemTrackingInfo(long postItemId) {
         PostItem postItem = postItemRepository.findById(postItemId)
                 .orElseThrow(() -> new NoSuchElementException(String.format(NSE_EXCEPTION_TEST, postItemId)));
